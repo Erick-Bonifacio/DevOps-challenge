@@ -34,10 +34,10 @@ class TransformAgent:
                 }
             ],
             temperature=0.2,
-            max_completion_tokens=75000
-            # top_p=0.95,
-            # stream=False,
-            # reasoning_format="hidden"
+            max_completion_tokens=75000,
+            top_p=0.95,
+            stream=False,
+            reasoning_format="hidden"
         )
 
         return completion.choices[0].message.content
@@ -60,10 +60,10 @@ class TransformAgent:
                 }
             ],
             temperature=0.6,
-            max_completion_tokens=75000
-            # top_p=0.95,
-            # stream=False,
-            # reasoning_format="hidden"
+            max_completion_tokens=75000,
+            top_p=0.95,
+            stream=False,
+            reasoning_format="hidden"
         )
 
         return completion.choices[0].message.content
