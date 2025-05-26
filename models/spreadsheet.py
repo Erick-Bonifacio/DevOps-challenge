@@ -2,6 +2,7 @@ import pandas as pd
 from dotenv import load_dotenv
 import os
 from io import StringIO
+from datetime import datetime
 
 load_dotenv()
 class Spreadsheet:
@@ -15,15 +16,12 @@ class Spreadsheet:
             return self
         except Exception as e:
             raise ValueError(f"Erro ao carregar planilha {path}: {e}")
-        
-    def data_clean(self):
-        self.df = self.df
 
     # Retorna o dataframe lido
-    def get_df(self):
+    def get_csv_string(self):
         if self.df is None:
             raise RuntimeError("Planilha ainda não carregada.")
-        return self.df
+        return self.df.to_csv()
     
     
     def transform_and_save(self, csv_string :str):
@@ -31,7 +29,8 @@ class Spreadsheet:
         csv_string = csv_string.replace('csv', '')
         output_dir = os.getenv('OUTPUT_DIR')
         os.makedirs(output_dir, exist_ok=True)
-        put_file = os.path.join(output_dir, 'resultado.xlsx')
+        filename = 'resultado_' + datetime.now().strftime('%y%m%d_%H%M%S') + '.xlsx'
+        put_file = os.path.join(output_dir, filename)
         
         try:
             # Converter string CSV para DataFrame
