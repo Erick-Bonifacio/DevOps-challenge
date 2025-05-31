@@ -96,7 +96,7 @@ Requisitos:
 Clone o projeto
 
 ```bash
-  git clone https://
+  git clone https://github.com/Erick-Bonifacio/DevOps-challenge.git
   cd DevOps-challenge
 ```
 
