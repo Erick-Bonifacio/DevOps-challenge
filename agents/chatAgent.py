@@ -33,7 +33,7 @@ class ChatSession:
         # Resposta do modelo
         reply = completion.choices[0].message.content.strip()
         self.messages.append({"role": "assistant", "content": reply})
-        return reply.replace('`', '').replace('json', '')
+        return reply.replace('`', '').replace('json', '').replace('\n', '').replace("'", '"') # Tratamento para garantir que resposta seja uma string JSON
 
     def reset(self):
         self.messages = [

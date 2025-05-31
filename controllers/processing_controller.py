@@ -1,6 +1,5 @@
-from models.spreadsheet import Spreadsheet
 from agents.decisionAgent import DecisionAgent
-from tools.tools import normalize_column_names, rename_column, drop_column, standardize_column_to_real_currency, add_total_cost_column
+from tools.tools import normalize_column_names, rename_column, drop_column, standardize_column_to_real_currency, add_total_cost_column, load_files_dataframes, save_result
 import os
 import json
 from dotenv import load_dotenv # type: ignore
@@ -15,18 +14,11 @@ class ProcessingController:
     def run(self):
         input_dir = os.getenv('INPUT_DIR')
         decisor = DecisionAgent()
-        files = {}
         tools_to_apply = {}
 
         print(Fore.YELLOW + '[1/6] Lendo arquivos...')
 
-        reader = Spreadsheet()
-        for filename in os.listdir(input_dir):
-            if filename.endswith('.xlsx'):
-                full_path = os.path.join(input_dir, filename)
-                df = reader.load(full_path).get_df()
-                files[filename] = df
-        
+        files = load_files_dataframes(input_dir)
         if not files:
             print("Nenhum arquivo encontrado.")
             return False, ''
@@ -42,28 +34,16 @@ class ProcessingController:
         print(Fore.YELLOW + '[3/6] Executando transformações...')
 
         for filename, df in files.items():
-            tools = (tools_to_apply[filename]).replace('\n', '').replace("'", '"') # tools aqui eh uma lista de jsons com cada tool e seus parametros
+            tools = (tools_to_apply[filename]).replace('\n', '').replace("'", '"') 
             tools = json.loads(tools)
-            # print(filename)
             for tool in tools:
                 if isinstance(tool, str):
                     tool = json.loads(tool)
                 tool_function = tool['tool_name']
 
-                if tool_function == 'normalize_column_names':
-                    files[filename] = normalize_column_names(files[filename])
+                files[filename] = self._apply_match_function(tool, tool_function, files, filename)
 
-                elif tool_function == 'rename_column':
-                    parameters = tool['parameters']
-                    files[filename] = rename_column(files[filename], parameters['rename_map'])
-
-                elif tool_function == 'standardize_column_to_real_currency':
-                    parameters = tool['parameters']
-                    files[filename] = standardize_column_to_real_currency(files[filename], parameters['columns'])
-
-                elif tool_function == 'drop_column':
-                    parameters = tool['parameters']
-                    files[filename] = drop_column(files[filename], parameters['columns'])
+                
                     
         print(Fore.GREEN + '[3/6] OK')
 
@@ -80,11 +60,32 @@ class ProcessingController:
         print(Fore.GREEN + '[5/6] OK')
 
         print(Fore.YELLOW + '[6/6] Salvando...')
-        sucess, path = reader.save(result)
+        sucess, path = save_result(result)
         print(Fore.GREEN + '[6/6] OK')
 
         return sucess, path
     
+    def _apply_match_function(self, tool, tool_function, files, filename):
+        if tool_function == 'normalize_column_names':
+            result = normalize_column_names(files[filename])
+
+        elif tool_function == 'rename_column':
+            parameters = tool['parameters']
+            result = rename_column(files[filename], parameters['rename_map'])
+
+        elif tool_function == 'standardize_column_to_real_currency':
+            parameters = tool['parameters']
+            result = standardize_column_to_real_currency(files[filename], parameters['columns'])
+
+        elif tool_function == 'drop_column':
+            parameters = tool['parameters']
+            result = drop_column(files[filename], parameters['columns'])
+        
+        else:
+            result = files[filename]
+        
+        return result
+
     def _merge_columns(self, df, col_base):
             col_x = f"{col_base}_x"
             col_y = f"{col_base}_y"

@@ -1,4 +1,3 @@
-from models.spreadsheet import Spreadsheet
 from agents.chatAgent import ChatSession
 from tools.tools import (
     sum_column,
@@ -15,12 +14,13 @@ from tools.tools import (
     describe_column,
     group_median,
     group_std,
-    stream_print
+    stream_print,
+    load_files_dataframes
 )
 import os
 import json
 from dotenv import load_dotenv # type: ignore
-from colorama import init, Fore, Style
+from colorama import init, Fore, Style, Back
 import pandas as pd
 pd.set_option('display.max_rows', 10)
 
@@ -31,22 +31,15 @@ class DiscussingController:
     def run(self):
         output_dir = os.getenv('OUTPUT_DIR')
         chat_agent = ChatSession()
-        files = {}
-
-        reader = Spreadsheet()
-        for filename in os.listdir(output_dir):
-            if filename.endswith('.xlsx'):
-                full_path = os.path.join(output_dir, filename)
-                df = reader.load(full_path).get_df()
-                files[filename] = df
-                
+        files = load_files_dataframes(output_dir)
 
         if not files:
             print("Nenhum arquivo encontrado.")
-            return False, ''
+            return
 
         stream_print("\n🤖 Olá, eu sou seu agente especializado em rateio de custos! Estou pronto para te ajudar com suas dúvidas. Digite sua pergunta ou 'sair' para sair.")
 
+        # Loop de chamada e resposta (chat) até o usuario sair
         while True:
             filename = self.get_file_wanted(files)
             if not filename:
@@ -56,93 +49,28 @@ class DiscussingController:
             if user_prompt.lower() in ['exit', 'sair']:
                 break
 
-            user_prompt = f'DATA: ${filename}: ${files[filename].to_csv()} - USER PROMPT: {user_prompt}'
-
             # chama a LLM para decidir tool
+            user_prompt = f'DATA: ${filename}: ${files[filename].to_csv()} - USER PROMPT: {user_prompt}'
             tool = chat_agent.ask(user_prompt)
 
+            # Match entre as tools disponíveis e a que será usada 
             try:
-                tool = tool.replace('\n', '').replace("'", '"') 
                 tool = json.loads(tool)
-            
-                result = 'No Result'
-                
                 tool_function = tool['tool_name']
+                result = self._apply_match_function(tool, tool_function, files, filename)
 
-                if tool_function == 'sum_column':
-                    parameters = tool['parameters']
-                    result = sum_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'avg_column':
-                    parameters = tool['parameters']
-                    result = avg_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'group_by':
-                    parameters = tool['parameters']
-                    result = group_by(files[filename], parameters['column_name'])
-
-                elif tool_function == 'min_column':
-                    parameters = tool['parameters']
-                    result = min_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'max_column':
-                    parameters = tool['parameters']
-                    result = max_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'sort_column':
-                    parameters = tool['parameters']
-                    result = sort_column(files[filename], parameters['column_name'], parameters.get('ascending', True))
-
-                elif tool_function == 'group_avg':
-                    parameters = tool['parameters']
-                    result = group_avg(files[filename], parameters['column_name_group'], parameters['column_name_avg'])
-
-                elif tool_function == 'group_sum':
-                    parameters = tool['parameters']
-                    result = group_sum(files[filename], parameters['column_name_group'], parameters['column_name_sum'])
-
-                elif tool_function == 'median_column':
-                    parameters = tool['parameters']
-                    result = median_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'std_column':
-                    parameters = tool['parameters']
-                    result = std_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'var_column':
-                    parameters = tool['parameters']
-                    result = var_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'describe_column':
-                    parameters = tool['parameters']
-                    result = describe_column(files[filename], parameters['column_name'])
-
-                elif tool_function == 'group_median':
-                    parameters = tool['parameters']
-                    result = group_median(files[filename], parameters['column_name_group'], parameters['column_name_median'])
-
-                elif tool_function == 'group_std':
-                    parameters = tool['parameters']
-                    result = group_std(files[filename], parameters['column_name_group'], parameters['column_name_std'])
-
-                elif tool_function == 'insufficient_tools':
-                    confirmation = self.ask_confirmation()
-                    if confirmation != '1':
-                        break
-                    result = f'Once dont have tools enough, analyze the entire file and give a response for the user question. FILE:' + files[filename].to_csv()
-
-                elif tool_function == 'show_dataframe':
-                    result = files[filename]
-
-                else:
-                    result = 'Funcao invalida'
+                # Result é falso quando o usuario não permite o envio massivo para a llm
+                if not result:
+                    break
 
             except Exception as e:
-                print(f"❌ Ocorreu um erro inesperado: {e}")
-                print(f"Uma possível causa é o agente se 'embaralhando' no seu retorno, por favor, reinicie o script e pergunte novamente ao agente")
+                print(Back.RED + f"❌ Ocorreu um erro inesperado: {e}")
+                print(Fore.RED + f"Uma possível causa é o agente se 'embaralhando' no seu retorno, por favor, reinicie o script e pergunte novamente ao agente")
                 break
 
-                
+            # Existem dois tipos de resposta possíveis
+            # Se retornou um dataframe, peço para a LLM explicar o resultado esperado
+            # Se retornou um valor fixo, peço para a LLM explicar ele
             if type(result) == pd.DataFrame:
                 chat_final_prompt = 'The tool that you recommended returned a dataframe that will be showed to user. Write the explanation for it based in your previous response. Now dont give me a json, but a objective explanation in portuguese'
                 chat_final_response = chat_agent.ask(chat_final_prompt)
@@ -154,6 +82,77 @@ class DiscussingController:
                 chat_final_response = chat_agent.ask(chat_final_prompt)
                 stream_print("\n🤖 Resultado:\n\n" + chat_final_response + '\n')
 
+
+    def _apply_match_function(self, tool :json, tool_function :str, files :dict, filename :str):
+        if tool_function == 'sum_column':
+            parameters = tool['parameters']
+            result = sum_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'avg_column':
+            parameters = tool['parameters']
+            result = avg_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'group_by':
+            parameters = tool['parameters']
+            result = group_by(files[filename], parameters['column_name'])
+
+        elif tool_function == 'min_column':
+            parameters = tool['parameters']
+            result = min_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'max_column':
+            parameters = tool['parameters']
+            result = max_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'sort_column':
+            parameters = tool['parameters']
+            result = sort_column(files[filename], parameters['column_name'], parameters.get('ascending', True))
+
+        elif tool_function == 'group_avg':
+            parameters = tool['parameters']
+            result = group_avg(files[filename], parameters['column_name_group'], parameters['column_name_avg'])
+
+        elif tool_function == 'group_sum':
+            parameters = tool['parameters']
+            result = group_sum(files[filename], parameters['column_name_group'], parameters['column_name_sum'])
+
+        elif tool_function == 'median_column':
+            parameters = tool['parameters']
+            result = median_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'std_column':
+            parameters = tool['parameters']
+            result = std_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'var_column':
+            parameters = tool['parameters']
+            result = var_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'describe_column':
+            parameters = tool['parameters']
+            result = describe_column(files[filename], parameters['column_name'])
+
+        elif tool_function == 'group_median':
+            parameters = tool['parameters']
+            result = group_median(files[filename], parameters['column_name_group'], parameters['column_name_median'])
+
+        elif tool_function == 'group_std':
+            parameters = tool['parameters']
+            result = group_std(files[filename], parameters['column_name_group'], parameters['column_name_std'])
+
+        elif tool_function == 'insufficient_tools':
+            confirmation = self.ask_confirmation()
+            if confirmation != '1':
+                return False
+            result = f'Once dont have tools enough, analyze the entire file and give a response for the user question. FILE:' + files[filename].to_csv()
+
+        elif tool_function == 'show_dataframe':
+            result = files[filename]
+
+        else:
+            result = 'Funcao invalida'
+        
+        return result
 
     def ask_confirmation(self):
         stream_print("\n⚠️ ATENÇÃO:")
