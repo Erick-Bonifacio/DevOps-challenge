@@ -10,8 +10,8 @@ class DecisionAgent:
         self.client = Groq(api_key=os.getenv('GROQ_API_KEY'))
         self.model = os.getenv('ANALYTICAL_MODEL')
         self.role = os.getenv('DECISOR_ROLE')
-        self.description_prompt = os.getenv('DECISOR_PROMPT')
-        self.chat_prompt = os.getenv('CHAT_PROMPT')
+        with open(os.getenv('DECISOR_PROMPT_PATH'), 'r', encoding='utf-8') as f:
+            self.description_prompt = f.read()
 
     def generate_flow(self, dados_consolidados: str) -> pd.DataFrame:
 

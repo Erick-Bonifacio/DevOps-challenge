@@ -1,5 +1,5 @@
 from agents.decisionAgent import DecisionAgent
-from tools.tools import normalize_column_names, rename_column, drop_column, standardize_column_to_real_currency, add_total_cost_column, load_files_dataframes, save_result
+from tools.tools import normalize_column_names, rename_column, drop_column, standardize_column_to_real_currency, add_total_cost_column, load_files_dataframes, save_result, sort_column
 import os
 import json
 from dotenv import load_dotenv # type: ignore
@@ -51,12 +51,14 @@ class ProcessingController:
 
         result = reduce(lambda left, right: pd.merge(left, right, on=['cpf', 'nome'], how='outer'), files.values())
 
+        # colapsar a coluna nome em uma só
         df_merged = self._merge_columns(result, 'nome')
 
         print(Fore.GREEN + '[4/6] OK')
 
         print(Fore.YELLOW + '[5/6] Calculando rateio...')
         result = add_total_cost_column(df_merged)
+        result = sort_column(result, 'nome')
         print(Fore.GREEN + '[5/6] OK')
 
         print(Fore.YELLOW + '[6/6] Salvando...')

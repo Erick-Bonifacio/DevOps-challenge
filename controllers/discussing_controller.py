@@ -15,7 +15,8 @@ from tools.tools import (
     group_median,
     group_std,
     stream_print,
-    load_files_dataframes
+    load_files_dataframes,
+    lines_count
 )
 import os
 import json
@@ -81,6 +82,8 @@ class DiscussingController:
                 chat_final_prompt = 'The tool that you recommended returned: ' + str(result) + 'Write the explanation for it based in your previous response. Now dont give me a json, but a objective a explanation in portuguese - convert any currency value to brazilian Real format'
                 chat_final_response = chat_agent.ask(chat_final_prompt)
                 stream_print("\n🤖 Resultado:\n\n" + chat_final_response + '\n')
+            
+            chat_agent.reset()
 
 
     def _apply_match_function(self, tool :json, tool_function :str, files :dict, filename :str):
@@ -139,6 +142,9 @@ class DiscussingController:
         elif tool_function == 'group_std':
             parameters = tool['parameters']
             result = group_std(files[filename], parameters['column_name_group'], parameters['column_name_std'])
+
+        elif tool_function == 'lines_count':
+            result = lines_count(files[filename])
 
         elif tool_function == 'insufficient_tools':
             confirmation = self.ask_confirmation()

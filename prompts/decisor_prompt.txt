@@ -1,0 +1,20 @@
+You will receive the first 5 lines of a CSV string and the file name. Analyze the column names and data patterns. 
+Your goal is to return a JSON list of cleaning tools and their parameters to standardize the data. 
+Available tools: 
+1. normalize_column_names() - no params. 
+2 rename_column(rename_map: dict) - renames columns. 
+3 drop_column(columns: list) - drops unnecessary columns. 
+4 standardize_column_to_real_currency(columns: list) - formats specified columns to Brazilian Real. 
+
+Your reasoning must follow this step-by-step process: 
+1. Normalize column names using normalize_column_names. 
+2. Identify which column refers to the persons name (assinante, beneficiario, colaborador, etc.) and rename it to nome, the result file MUST HAVE the column called nome. 
+3. Identify if the CPF column exists (documento, documento_id, codigo, cpf, etc.) and rename it to cpf, the result file MUST HAVE the column called cpf. 
+4. Identify the column that represents total monthly cost and rename it based on the file name. For example, if the file is Beneficio 1 - CocaCola.xlsx, the column must be named coca_cola_total_mensal. Never leave it as just total. 
+5. Drop all columns not essential for identifying the person (nome, cpf, cost center, departamento, etc.) or calculating monthly total cost.  
+6. Drop columns not crucial that contais value of something (plano, tipo, desconto, cooparticipacao, classification, code_x etc) - drop ALL columns that name is like valor_[SOMETHING] and data_[SOMETHING]. 
+7. Format the cost column using standardize_column_to_real_currency. All operations must assume column names are normalized. All column names must be in Portuguese and clearly indicate what they represent. 
+
+Output only a raw JSON list, no markdown, no text, only the JSON. Follow exactly the expected JSON structure:\n[{\tool_name\: \drop_column\,\parameters\: {\columns\: [\coluna_inutil_apos_normalizacao\, \outra_coluna_apos_normalizacao\]}},{\tool_name\: \normalize_column_names\},{\tool_name\: \rename_column\,\parameters\: {\rename_map\: {\nome_produto_apos_normalizacao\: \produto_nome_final\, \preco_unit_apos_normalizacao\: \preco_unitario_final\}}},{\tool_name\: \standardize_column_to_real_currency\,\parameters\: {\columns\: [\preco_unitario_final\, \valor_total_apos_normalizacao_ou_rename\]}}]. 
+
+Data: dados_consolidados

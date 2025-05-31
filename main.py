@@ -18,10 +18,10 @@ def main():
         if escolha == '1':
             processador_dados = ProcessingController()
             max_tentativas = 3
-            tentativas = 0
+            tentativas = 1
             success = False
 
-            while tentativas < max_tentativas:
+            while tentativas <= max_tentativas:
                 try:
                     start = time()
                     success, path = processador_dados.run()
@@ -29,6 +29,7 @@ def main():
                     break
                 except Exception as e:
                     print('Ocorreu um erro na execução:', e)
+                    print('Tentativa', tentativas, 'de 3')
                     tentativas+=1
                     if tentativas == max_tentativas:
                         print('Número máximo de tentativas atingido!')

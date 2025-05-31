@@ -25,7 +25,7 @@ def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = [normalize(col) for col in df.columns]
     return df
 
-# Converte uma coluna inteira pro padrão Real Brasileiro
+# Converte uma lista de colunas inteiras pro padrão Real Brasileiro
 def standardize_column_to_real_currency(df: pd.DataFrame, columns: list) -> pd.DataFrame:
     def format_real(value):
         try:
@@ -61,8 +61,8 @@ def add_total_cost_column(df: pd.DataFrame) -> pd.DataFrame:
         if df[col].astype(str).head(5).str.match(currency_pattern).all()
     ]
 
-    df["custo_total"] = df[currency_columns].applymap(parse_brl_to_float).sum(axis=1)
-    df["custo_total"] = df["custo_total"].apply(format_float_to_brl)
+    df["custo_total_agregado"] = df[currency_columns].applymap(parse_brl_to_float).sum(axis=1)
+    df["custo_total_agregado"] = df["custo_total_agregado"].apply(format_float_to_brl)
 
     return df
 
@@ -139,6 +139,10 @@ def group_std(df: pd.DataFrame, column_name_group: str, column_name_std: str):
     df = df.copy()
     df[column_name_std] = df[column_name_std].apply(parse_brl_to_float)
     return df.groupby(column_name_group)[column_name_std].std().reset_index()
+
+#retorna o numero de linhas
+def lines_count(df: pd.DataFrame) -> int:
+    return len(df)
 
 # Printar em partes - fluidez
 def stream_print(text, delay=0.02):

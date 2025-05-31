@@ -9,8 +9,8 @@ class ChatSession:
         self.client = Groq(api_key=os.getenv('GROQ_API_KEY'))
         self.model = os.getenv('ANALYTICAL_MODEL')
         self.system_prompt = os.getenv('CHAT_ROLE')
-        self.initial_prompt = os.getenv('CHAT_PROMPT')
-        
+        with open(os.getenv('CHAT_PROMPT_PATH'), 'r', encoding='utf-8') as f:
+            self.initial_prompt = f.read()        
         # Histórico da conversa
         self.messages = [
             {"role": "system", "content": self.system_prompt},
