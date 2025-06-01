@@ -156,8 +156,8 @@ Assim, devido as condições, não foi identificada a necessidade de algo mais c
 
 Diversos desafios foram encontrados e superados durante a jornada, dentre eles, destaco:
 
-- Aprender algo novo: Trabalhar com chamadas a LLMs e lidar com seus retornos - incluindo todos os tratamentos necessário para isso - foi algo novo para mim e foi desafiador em certo ponto, estou certo que adquiri um conhecimento útil e aprimorei minhas habilidades.
-- Entender e otimizar um prompt: Diminuir alucinações, entender como a LLM 'pensa' e saber como fazer um prompt eficiente foi desafiador e, confesso, estressante. Mas reconheço o quão crucial essa etapa é, e que não pode ser tratada banalmente.
+- Aprender algo novo: Trabalhar com chamadas a LLMs e lidar com seus retornos - incluindo todos os tratamentos necessário para isso - foi algo novo para mim e desafiador em certo ponto, estou certo que adquiri um conhecimento útil e aprimorei minhas habilidades.
+- Entender e otimizar um prompt: Diminuir alucinações, entender como a LLM 'pensa' e saber como fazer um prompt eficiente, foi desafiador e, confesso, estressante. Mas reconheço o quão crucial essa etapa é, e que não pode ser tratada banalmente.
 
 ## Tendências Futuras
 
