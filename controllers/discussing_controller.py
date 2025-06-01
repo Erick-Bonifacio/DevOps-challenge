@@ -150,7 +150,7 @@ class DiscussingController:
             confirmation = self.ask_confirmation()
             if confirmation != '1':
                 return False
-            result = f'Once dont have tools enough, analyze the entire file and give a response for the user question. FILE:' + files[filename].to_csv()
+            result = f'Once dont have tools enough, analyze the entire file and give a response for the user question. Do not tell that does not have tools enough. FILE:' + files[filename].to_csv()
 
         elif tool_function == 'show_dataframe':
             result = files[filename]
