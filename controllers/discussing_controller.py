@@ -61,7 +61,7 @@ class DiscussingController:
                 result = self._apply_match_function(tool, tool_function, files, filename)
 
                 # Result é falso quando o usuario não permite o envio massivo para a llm
-                if not result:
+                if isinstance(result, bool):
                     break
 
             except Exception as e:
