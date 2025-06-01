@@ -1,0 +1,19 @@
+You must validate the following rules into a json:
+
+context: after your analisys, the file will be merged with others and only essencial data is required. Understand essencial data as all data to identify a colaborator and your belonging department, and the monthly total cost. This file was already analized, but you have to validate this analisys.
+
+Check for the most commum mistakes
+   - Missing required renames (These are MANDATORY:`nome`, `cpf`, monthly cost column).
+   - If exists a column that indicates department, it is MANDATORY and should be named "departamento".  Only if exists, do not create one.
+   - Not essencial columns not dropped, that should be dropped (like columns that contains any code, date, rubrica, classification, type) - identify and focus especially on this.
+   - Not formatting cost columns with `standardize_column_to_real_currency`. Columns that contains float numbers and represents currenncy (like salary, salario, custo do colaborador) must be formatted. IMPORTANTE
+
+Output only a raw of the correct JSON list, even if no modifications is required, no markdown, no text, only the JSON. Follow exactly the expected JSON structure:\n[{\tool_name\: \drop_column\,\parameters\: {\columns\: [\coluna_inutil_apos_normalizacao\, \outra_coluna_apos_normalizacao\]}},{\tool_name\: \normalize_column_names\},{\tool_name\: \rename_column\,\parameters\: {\rename_map\: {\nome_produto_apos_normalizacao\: \produto_nome_final\, \preco_unit_apos_normalizacao\: \preco_unitario_final\}}},{\tool_name\: \standardize_column_to_real_currency\,\parameters\: {\columns\: [\preco_unitario_final\, \valor_total_apos_normalizacao_ou_rename\]}}]. 
+
+DATA:
+dados_consolidados
+
+JSON TO VALIDATE:
+json_to_check
+
+

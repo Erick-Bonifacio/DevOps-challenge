@@ -17,11 +17,11 @@ def main():
 
         if escolha == '1':
             processador_dados = ProcessingController()
-            max_tentativas = 3
+            max_tentativas = 4
             tentativas = 1
             success = False
 
-            while tentativas <= max_tentativas:
+            while tentativas < max_tentativas:
                 try:
                     start = time()
                     success, path = processador_dados.run()

@@ -7,7 +7,7 @@ Bem vindo ao repositório de código do desafio Devops Techlab!
 
 Com esse projeto, visa-se criar um script ETL para transformar e gerar informações sobre os custos de uma empresa com seus funcionários, levando em consideração todos os beneficios concedidos a estes.
 
-Documento de requisitos disponível no repositório
+[Documento de requisitos disponível no repositório](https://)
 
 ### Menu de opções iniciais
 
@@ -29,10 +29,12 @@ Encerra a execução do programa.
 Esse menu garante uma navegação clara e objetiva entre as funcionalidades principais do sistema, permitindo ao usuário decidir se quer apenas processar os dados ou também obter insights e suporte através do agente integrado.
 
 ### Funcionamento
+[Demonstração simples da opção 1](https://)
 
 0. Arquivo main.py: ponto de entrada do sistema. Apresenta um menu com as opções e com base na escolha, direciona o fluxo para o controlador adequado.
 
-1. Geração de Relatório
+1. Processo de transformação
+Descrição: Realiza o fluxo ETL decidido pelo modelo LLM, aplica regra de rateio e salva arquivo de resultado.
 Responsável: ProcessingController
 
 Etapas:
@@ -59,7 +61,8 @@ Adiciona uma coluna com o custo total por indivíduo.
 Salvamento:
 Exporta o resultado para a pasta OUTPUT_DIR.
 
-2. Discussão dos Dados
+2. Discussão dos Dados (EXTRA)
+Descrição: Assistente focado em responder perguntas (média, desvio padrao, agrupamentos, etc) sobre o arquivo de resultado gerado. Atua com tools pré definidas e chamadas massivas (em casos específicos)
 Responsável: DiscussingController
 
 Etapas:
@@ -85,9 +88,17 @@ O usuário é alertado e pode optar por enviar o arquivo completo para a LLM ten
 
 O tempo de execução varia de acordo com o tamanho dos arquivos de entrada, pois operações com dataframes com a biblioteca Pandas são O(n). Deve-se considerar a latência do envio de requisições a LLM e seu tempo de processamento - que costuma ser regular, uma vez que não são enviados todos os dados para a análise.
 
-Com os inputs atuais fornecidos, o processo de transformação leva de 8 a 15 segundos.
+Com os inputs atuais fornecidos, o processo de transformação leva de 60 a 90 segundos.
 
 O tempo de tal processo é exibido ao fim da execução.
+
+### Tratamento de erros e prevenção de falhas
+
+O sistema pode falhar, principalmente por conta das respostas do modelo de IA. Assim, foram implementadas medidas preemptivas:
+
+- Decision Double Check: O fluxo é gerado e, a partir da resposta da primeira chamada, uma segunda chamada de conferência acontece, visando atenuar erros comuns, como drops esquecidos, formatação não realizada e outros.
+- Retentativa: O fluxo de ETL, em caso de erro, é reiniciado. O número máximo de tentativas é 3.
+- Reset do chat: Para mitigar alucinações do modelo, o chat é silenciosamente resetado a cada resposta. Como o objetivo é atender a perguntas diretas do usuário sobre o arquivo de resultado, o contexo é descartado.
 
 ## Como rodar
 
@@ -131,7 +142,6 @@ Rode o projeto
 
 O menu demontrado aparecerá no terminal.
 
-
 ## Explicações e Preferências técnicas
 
 ### LLM usada
@@ -142,6 +152,13 @@ Todo o projeto usa o modelo 'deepseek-r1-distill-llama-70b' para suas operaçõe
 
 Inicialmente, devido ao escopo reduzido do projeto, optei por não utilizar nenhum framework inicializador, mas sim criar manualmente a arquitetura conforme necessidades e seguindo padrões já sabidos.
 Assim, devido as condições, não foi identificada a necessidade de algo mais complexo.
+
+## Desafios
+
+Diversos desafios foram encontrados e superados durante a jornada, dentre eles, destaco:
+
+- Aprender algo novo: Trabalhar com chamadas a LLMs e lidar com seus retornos - incluindo todos os tratamentos necessário para isso - foi algo novo para mim e foi desafiador em certo ponto, estou certo que adquiri um conhecimento útil e aprimorei minhas habilidades.
+- Entender e otimizar um prompt: Diminuir alucinações, entender como a LLM 'pensa' e saber como fazer um prompt eficiente foi desafiador e, confesso, estressante. Mas reconheço o quão crucial essa etapa é, e que não pode ser tratada banalmente.
 
 ## Tendências Futuras
 
