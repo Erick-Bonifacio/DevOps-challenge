@@ -7,7 +7,7 @@ Bem vindo ao repositório de código do desafio Devops Techlab!
 
 Com esse projeto, visa-se criar um script ETL para transformar e gerar informações sobre os custos de uma empresa com seus funcionários, levando em consideração todos os beneficios concedidos a estes.
 
-[Documento de requisitos disponível no repositório](https://)
+[Documento de requisitos disponível no repositório](https://github.com/Erick-Bonifacio/DevOps-challenge/blob/main/assets/Desafio%20DevOps.pdf)
 
 ### Menu de opções iniciais
 
@@ -29,7 +29,7 @@ Encerra a execução do programa.
 Esse menu garante uma navegação clara e objetiva entre as funcionalidades principais do sistema, permitindo ao usuário decidir se quer apenas processar os dados ou também obter insights e suporte através do agente integrado.
 
 ### Funcionamento
-[Demonstração simples da opção 1](https://)
+[Demonstração simples da opção 1](https://github.com/Erick-Bonifacio/DevOps-challenge/blob/main/assets/system_basic_demonstration.mp4)
 
 0. Arquivo main.py: ponto de entrada do sistema. Apresenta um menu com as opções e com base na escolha, direciona o fluxo para o controlador adequado.
 
